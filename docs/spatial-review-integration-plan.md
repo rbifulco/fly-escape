@@ -5,9 +5,10 @@ The requested integration uses the published Alterno SDK and a dedicated
 The official editor at https://spatial-review.alterno.dev may discover and
 capture only the registered authored level artwork. Same-origin access is also
 supported; other origins and cross-origin loopback access are disabled.
-No deployment was made. Vercel routes add a discovery-only CORS header for the
-official editor; framing defaults are unchanged. Both pages are embeddable under
-the current host configuration.
+The initial integration was validated locally. The later GitHub Pages build at
+`https://rbifulco.github.io/fly-escape/` publishes the game and dedicated review
+page on a separate fork branch. Vercel routes still add a discovery-only CORS
+header for the original host; framing defaults are unchanged.
 
 ## Representation and source mapping
 
@@ -87,8 +88,12 @@ production preview: http://127.0.0.1:5195):
   SDK's 64 MiB progressive geometry ceiling; deferred construction is not needed
   for this bounded static representation. No navigation points are exported.
 
-Not verified: deployed response/framing behavior, hosted-editor UI acceptance,
-a human feedback-export/source-change round trip, and exhaustive appearance
-comparison of every material. The full optional Python/Rust test suite was not
-run; this change is limited to browser integration. Screenshots and command logs
-from local validation are temporary, not committed historical evidence.
+The GitHub Pages workflow built the Rust WASM game and published its static output
+under `/fly-escape/`. The hosted game and both authored review levels loaded in
+a live browser. Both discovery documents returned 200 with CORS; the hosted
+capture generated editor links with the selected level and its discovery URL.
+
+Not verified: a human feedback-export/source-change round trip and exhaustive
+appearance comparison of every material. The full optional Python/Rust test suite
+was not run; screenshots and command logs from the original local validation
+were temporary, not committed historical evidence.

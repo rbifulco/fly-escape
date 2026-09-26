@@ -4,6 +4,10 @@
 
 [Play in your browser](https://fly-escape.vercel.app)
 
+The [GitHub Pages build](https://rbifulco.github.io/fly-escape/) also includes
+[Alterno Spatial Review](https://spatial-review.alterno.dev/review?site=https%3A%2F%2Frbifulco.github.io%2Ffly-escape%2F)
+for the authored levels. The Vercel deployment is separate.
+
 Arrange household objects, release the flies, and see how many find their way outside before time runs out. You shape their surroundings; their simulated neurons drive their movement. Watch the swarm, follow one curious fly, or peek inside its brain as it explores.
 
 ![The first house, with a sunlit exit and household objects ready to place](specs/done/help-the-fly-escape/assets/evidence/34-game-overlays/setup.png)
