@@ -28,10 +28,10 @@ jobs:
       - name: Install Rust for the browser simulation
         run: rustup toolchain install 1.94.1 --profile minimal --target wasm32-unknown-unknown
       - run: bun install --frozen-lockfile
-      - run: bun run typecheck
       - run: bun run build
         env:
           PAGES_BASE: /fly-escape/
+      - run: bun run typecheck
       - run: node scripts/stage-pages.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
