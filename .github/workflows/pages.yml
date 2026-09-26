@@ -34,9 +34,14 @@ jobs:
       - run: bun run typecheck
       - run: node scripts/stage-pages.mjs
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
+      - name: Package Pages files, including discovery
+        run: |
+          test -f apps/web/dist/.well-known/spatial-review.json
+          tar --dereference --hard-dereference -cf "$RUNNER_TEMP/artifact.tar" -C apps/web/dist .
+      - uses: actions/upload-artifact@v4
         with:
-          include-hidden-files: true
-          path: apps/web/dist
+          name: github-pages
+          path: ${{ runner.temp }}/artifact.tar
+          retention-days: 1
       - id: deployment
         uses: actions/deploy-pages@v4
