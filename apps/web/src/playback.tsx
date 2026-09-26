@@ -574,7 +574,7 @@ export function AttemptPlayback({
           </span>
           <h1>{input ? (error ? "Flight interrupted" : "Off they go!") : "Twenty lives, one shared clock."}</h1>
         </div>
-        {!input && <a href="/lab/lifecycle">Lifecycle lab</a>}
+        {!input && <a href={`${import.meta.env.BASE_URL}lab/lifecycle/`}>Lifecycle lab</a>}
       </header>}
       <section className="workspace">
         <div className={`world playback-world${input ? " game-world" : ""}`}>

@@ -1,0 +1,18 @@
+{
+  "schema": "spatial-review-discovery/v1",
+  "version": 1,
+  "name": "Fly Escape \u2014 Turn the Corner",
+  "websiteUrl": "../",
+  "liveCapture": "../spatial-review.html?level=turn-the-corner",
+  "capabilities": {
+    "liveCapture": {
+      "editorOriginPolicy": {
+        "mode": "allowlist",
+        "origins": [
+          "https://spatial-review.alterno.dev"
+        ],
+        "allowLoopbackPeers": false
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@ import "./about.css";
 export function About() {
   return (
     <main className="about-page">
-      <a href="/">Back to the game</a>
+      <a href={import.meta.env.BASE_URL}>Back to the game</a>
       <h1>About the data and models</h1>
       <p>
         Help the Fly Escape combines a real fly connectivity dataset with a simplified neural
@@ -28,7 +28,7 @@ export function About() {
           .
         </p>
         <p>
-          The <a href="/brain/manifest.json">bundled graph manifest</a> identifies this build’s
+          The <a href={`${import.meta.env.BASE_URL}brain/manifest.json`}>bundled graph manifest</a> identifies this build’s
           source files, checksums, extraction rules and graph hash. Connections are selected and
           transformed into signed incoming weights for simulation; missing transmitter annotations
           use the exporter’s documented fallback.

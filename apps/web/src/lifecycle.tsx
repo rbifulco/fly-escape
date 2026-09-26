@@ -121,7 +121,7 @@ export function LifecycleLab() {
           <div className="eyebrow">Fly escape · lifecycle lab</div>
           <h1>A meal buys more time.</h1>
         </div>
-        <a href="/lab/fields">Sensory lab</a>
+        <a href={`${import.meta.env.BASE_URL}lab/fields/`}>Sensory lab</a>
       </header>
       <section className="workspace">
         <div className="world">

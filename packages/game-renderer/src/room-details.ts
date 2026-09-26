@@ -99,7 +99,7 @@ export class RoomDetails {
   }
 }
 
-export async function loadRoomDetails(view: WorldView, details: readonly RoomDetail[], isCurrent: () => boolean) {
+export async function loadRoomDetails(view: Pick<WorldView, "setRoomDetails">, details: readonly RoomDetail[], isCurrent: () => boolean) {
   if (details.length > 16 || details.filter(detail => detail.kind === "sconce").length > 4)
     throw new Error("A room scene supports at most 16 wall details and four household lights");
   const results = await Promise.allSettled([...new Set(details.map(detail => detail.kind))].map(async kind => {

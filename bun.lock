@@ -27,15 +27,18 @@
     "apps/web": {
       "name": "@fly-escape/web",
       "dependencies": {
+        "@alterno-dev/spatial-review": "0.7.0",
         "@fly-escape/game-renderer": "workspace:*",
         "@fly-escape/sim-client": "workspace:*",
         "@vercel/analytics": "^2.0.1",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
+        "three": "0.185.1",
       },
       "devDependencies": {
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
+        "@types/three": "^0.185.0",
         "typescript": "^6.0.3",
         "vite": "^8.0.16",
       },
@@ -62,6 +65,10 @@
     "three@0.185.1": "patches/three@0.185.1.patch",
   },
   "packages": {
+    "@alterno-dev/spatial-review": ["@alterno-dev/spatial-review@0.7.0", "", { "dependencies": { "@alterno-dev/spatial-review-protocol": "0.7.0" }, "peerDependencies": { "three": ">=0.160.0 <1" } }, "sha512-tXHBn3XU8fMXhgCC87CwcMAbfG764qSJKSYTQaSigkjhOq4hhfgHVsDd7wFibS3M32tj//nnNoh+Gp5EyuKUqQ=="],
+
+    "@alterno-dev/spatial-review-protocol": ["@alterno-dev/spatial-review-protocol@0.7.0", "", {}, "sha512-Mt+3bDo372GinpeE+QtZyFUfbWpQ5IN73G8BvQrShFzrR7RrOhCjLFbgImYRNWmR845ivq9e295ce4SMV/dyIg=="],
+
     "@dimforge/rapier3d-compat": ["@dimforge/rapier3d-compat@0.12.0", "", {}, "sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow=="],
 
     "@fly-escape/asset-lab": ["@fly-escape/asset-lab@workspace:apps/asset-lab"],

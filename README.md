@@ -57,3 +57,5 @@ For contributors, the [development guide](docs/development.md) explains the code
 
 The [directional sensing rationale](specs/done/directional-vision/README.md) records the coarse light model, replay contract and measured limits.
 The [neural vision rationale](specs/done/neural-vision/README.md) separates validated circuit responses from unproven attraction. [Campaign vision](specs/done/campaign-vision/README.md) records the enabled room lighting and gameplay regression checks.
+
+For Alterno scene and asset review, see [Spatial review with Alterno](docs/development.md#spatial-review-with-alterno).

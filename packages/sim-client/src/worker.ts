@@ -25,11 +25,11 @@ let assets: Promise<[InitOutput, Uint8Array, string]> | undefined;
 const loadAssets = () =>
   (assets ??= Promise.all([
     init(),
-    fetch("/brain/graph.bin").then(async (r) => {
+    fetch(`${import.meta.env?.BASE_URL ?? "/"}brain/graph.bin`).then(async (r) => {
       if (!r.ok) throw new Error(`Graph download failed (${r.status})`);
       return new Uint8Array(await r.arrayBuffer());
     }),
-    fetch("/brain/manifest.json").then(async (r) => {
+    fetch(`${import.meta.env?.BASE_URL ?? "/"}brain/manifest.json`).then(async (r) => {
       if (!r.ok) throw new Error(`Manifest download failed (${r.status})`);
       return r.text();
     }),

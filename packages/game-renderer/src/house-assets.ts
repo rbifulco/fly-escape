@@ -14,7 +14,7 @@ import sofaUrl from "../../../assets/house/sofa/sofa.glb?url";
 const urls: Record<HouseAsset, string> = { wall: wallUrl, floor: floorUrl, tileFloor: tileFloorUrl, solid: solidUrl, cabinet: cabinetUrl, sofa: sofaUrl, desk: deskUrl, chair: chairUrl, bed: bedUrl, kitchen: kitchenUrl };
 
 /** Load one kit per view. Replacement owns resources; retired views release late replies. */
-export async function loadHouseAssets(view: WorldView, isCurrent: () => boolean, parts: readonly HouseAsset[] = view.houseAssetKeys) {
+export async function loadHouseAssets(view: Pick<WorldView, "houseAssetKeys" | "setHousePart">, isCurrent: () => boolean, parts: readonly HouseAsset[] = view.houseAssetKeys) {
   const results = await Promise.allSettled(
     parts.map(async (part) => {
       const response = await fetch(urls[part]);

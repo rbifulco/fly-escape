@@ -106,7 +106,7 @@ export function FieldsLab() {
           <span className="eyebrow">FLY ESCAPE · SENSORY LAB</span>
           <h1>What reaches the fly?</h1>
         </div>
-        <a href="/lab/brain">Neural lab</a>
+        <a href={`${import.meta.env.BASE_URL}lab/brain/`}>Neural lab</a>
       </header>
       <section className="workspace">
         <div className="field-worlds">

@@ -1,0 +1,16 @@
+{
+  "schema": "spatial-review-discovery/v1",
+  "version": 1,
+  "name": "Fly Escape",
+  "websiteUrl": "../",
+  "liveCapture": "../spatial-review.html",
+  "capabilities": {
+    "liveCapture": {
+      "editorOriginPolicy": {
+        "mode": "allowlist",
+        "origins": ["https://spatial-review.alterno.dev"],
+        "allowLoopbackPeers": false
+      }
+    }
+  }
+}

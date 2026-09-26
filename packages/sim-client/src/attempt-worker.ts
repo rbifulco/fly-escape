@@ -43,11 +43,11 @@ let assets: Promise<[InitOutput, Uint8Array, string]> | undefined;
 const loadAssets = () =>
   (assets ??= Promise.all([
     loadWasm(),
-    fetch("/brain/graph.bin").then(async (response) => {
+    fetch(`${import.meta.env?.BASE_URL ?? "/"}brain/graph.bin`).then(async (response) => {
       if (!response.ok) throw new Error(`Graph download failed (${response.status})`);
       return new Uint8Array(await response.arrayBuffer());
     }),
-    fetch("/brain/manifest.json").then(async (response) => {
+    fetch(`${import.meta.env?.BASE_URL ?? "/"}brain/manifest.json`).then(async (response) => {
       if (!response.ok) throw new Error(`Manifest download failed (${response.status})`);
       return response.text();
     }),
