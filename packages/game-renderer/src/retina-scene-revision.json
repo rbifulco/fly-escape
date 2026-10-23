@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "revision": "f2914f6331caef033ad4cfb1d30f4ee20e44098e768bf47b5cf2685f7b49d62f",
+  "revision": "ac28670c619427d9613a05c0be7d33522a31ed9e6a8d54c728bc2210534e9bdf",
   "files": [
     {
       "path": "assets/food/apple/apple.glb",
@@ -176,7 +176,7 @@
     },
     {
       "path": "bun.lock",
-      "sha256": "9e9df30d98d36a34c9c978479499b7af14ab4f5bf2dcb42e3e358be5a14e7f6e"
+      "sha256": "127759fd89cc56edc9aebec9f4c0cbd10c556b4f3747b63c3e08e4dffe0b2329"
     },
     {
       "path": "package.json",

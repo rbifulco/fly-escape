@@ -250,26 +250,28 @@ function BrainLab() {
   );
 }
 
+const siteRoute = location.pathname.slice((import.meta.env.BASE_URL || '/').length - 1) || '/';
+
 createRoot(document.getElementById("root")!).render(
   new URLSearchParams(location.search).has("about") ? (
     <About />
   ) : (
     <>
-      {location.pathname === "/" ? (
+      {siteRoute === "/" ? (
         <Campaign levels={campaignLevels} />
-      ) : location.pathname === "/lab/setup" ? (
+      ) : siteRoute === "/lab/setup" || siteRoute === "/lab/setup/" ? (
         <DiagnosticSetup />
-      ) : location.pathname === "/lab/playback" ? (
+      ) : siteRoute === "/lab/playback" || siteRoute === "/lab/playback/" ? (
         <PlaybackLab />
-      ) : location.pathname === "/lab/lifecycle" ? (
+      ) : siteRoute === "/lab/lifecycle" || siteRoute === "/lab/lifecycle/" ? (
         <LifecycleLab />
-      ) : location.pathname === "/lab/fields" ? (
+      ) : siteRoute === "/lab/fields" || siteRoute === "/lab/fields/" ? (
         <FieldsLab />
       ) : (
         <BrainLab />
       )}
-      <footer className={`app-information${location.pathname === "/" ? " game-information" : ""}`}>
-        <a href="/?about">About the data and models</a>
+      <footer className={`app-information${siteRoute === "/" ? " game-information" : ""}`}>
+        <a href={`${import.meta.env.BASE_URL}?about`}>About the data and models</a>
       </footer>
     </>
   ),

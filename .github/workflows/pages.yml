@@ -1,0 +1,47 @@
+name: Publish Fly Escape to GitHub Pages
+
+on:
+  push:
+    branches: [spatial-review-pages]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - name: Install Rust for the browser simulation
+        run: rustup toolchain install 1.94.1 --profile minimal --target wasm32-unknown-unknown
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+        env:
+          PAGES_BASE: /fly-escape/
+      - run: bun run typecheck
+      - run: node scripts/stage-pages.mjs
+      - uses: actions/configure-pages@v5
+      - name: Package Pages files, including discovery
+        run: |
+          test -f apps/web/dist/.well-known/spatial-review.json
+          tar --dereference --hard-dereference -cf "$RUNNER_TEMP/artifact.tar" -C apps/web/dist .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/artifact.tar
+          retention-days: 1
+      - id: deployment
+        uses: actions/deploy-pages@v4

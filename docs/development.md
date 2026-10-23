@@ -50,3 +50,32 @@ vercel deploy --prebuilt --prod
 ```
 
 The packaging step reuses the checked-in route configuration. Existing files resolve directly; diagnostic `/lab/*` routes fall back to the game document. Missing asset URLs remain errors rather than returning HTML. Local project metadata and deployment credentials stay ignored.
+
+## Spatial review with Alterno
+
+After `bun install` and the normal build, run `bun run dev` and open
+`http://127.0.0.1:5173/spatial-review.html`. Choose either campaign level and
+click **Open in Alterno**. Keep the capture page available while reviewing.
+The link includes the selected level's discovery document. On a deployed build,
+the same page is at `/spatial-review.html`.
+
+The dedicated page exports authored architecture, furniture, wall details and
+fixed objects through `@alterno-dev/spatial-review` 0.7.0. It does not read saved
+player arrangements or start the simulation. Normal gameplay does not load the
+review SDK. Review access is restricted to the website's own origin and
+`https://spatial-review.alterno.dev`.
+
+Use Scene for placement feedback and Asset for model/material feedback. Export
+feedback from Alterno and use the source references and coordinate rules in the
+[integration plan](spatial-review-integration-plan.md) to apply it to this repo.
+Review edits do not automatically change gameplay or collision geometry.
+
+Run adapter tests with `bun test apps/web/src/spatial-review-scene.test.ts`.
+For live browser acceptance, start the development server on port 5193 and run
+`node tests/browser/spatial-review.mjs` (install Chromium with
+`bunx playwright install chromium` first). `BASE_URL`, `CHROMIUM_PATH`, and
+`REVIEW_OUTPUT` can override the server, browser executable, and screenshot
+location. Static hosts must serve both `.well-known/spatial-review*.json` files
+as JSON and allow the official editor origin to fetch them. The Vite development
+server and Vercel route configuration supply the discovery CORS header. They do
+not enable cross-origin capture for other editors.

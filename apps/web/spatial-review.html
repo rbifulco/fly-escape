@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fly Escape · Spatial Review</title>
+  <style>
+    * { box-sizing: border-box } body { margin: 0; font: 15px system-ui; background: #eef1e7; color: #263f32 }
+    header { padding: 16px 24px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: #fffdf3 }
+    h1 { font-size: 18px; margin: 0 auto 0 0 } a { color: inherit } select, button { font: inherit }
+    #status { margin: 0; padding: 10px 24px } #world { height: calc(100vh - 150px); min-height: 300px }
+    canvas { display: block; width: 100%; height: 100% } footer { padding: 8px 24px; font-size: 12px }
+  </style>
+</head>
+<body>
+  <header><h1>Fly Escape · Spatial Review</h1><label>Level <select id="level"><option value="open-window">Open Window</option><option value="turn-the-corner">Turn the Corner</option></select></label><a id="editor" target="_blank" rel="noopener">Open in Alterno</a><a href="./">Play the game</a></header>
+  <p id="status" role="status">Loading authored artwork…</p>
+  <div id="world" aria-label="Authored level preview"></div>
+  <footer>Drag to orbit · Scroll to zoom · Static full-height architecture and fixed objects. Gameplay effects and player arrangements are excluded.</footer>
+  <script type="module" src="./src/spatial-review.ts"></script>
+</body>
+</html>
