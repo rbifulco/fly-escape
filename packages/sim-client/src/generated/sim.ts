@@ -2,9 +2,22 @@
 
 export type SetupFixture = { level: LevelDef, tuning: AttemptTuning, catalog: Array<ToolDef>, };
 export type StartAttempt = { attemptId: string, rootSeed: string, flyCount: number, level: LevelDef, tuning: AttemptTuning, placements: Array<Placement>, };
-export type AttemptInfo = { spec: AttemptSpec, level: LevelDef, resolvedSetup: ResolvedSetup, initialBodies: Array<BodyState>, initialSensoryPoints: Array<[Point, Point]>, groups: Array<Group>, groupLinks: Array<GroupLink>, recordLayout: RecordLayout, archiveBytes: number, graphBytes: number, brainStateBytes: number, };
+export type AttemptInfo = { spec: AttemptSpec, level: LevelDef, resolvedSetup: ResolvedSetup, initialBodies: Array<BodyState>, initialSensoryPoints: Array<[Point, Point]>, groups: Array<Group>, groupLinks: Array<GroupLink>, recordLayout: RecordLayout, archiveBytes: number, graphBytes: number, brainStateBytes: number, retinalConfig?: RetinalConfig | null, };
 export type AttemptStep = { tick: number, neuralSteps: number, bufferedTicks: number, complete: boolean, };
-export type ChunkHeader = { schemaVersion: number, attemptId: string, sequence: number, startTick: number, tickCount: number, flyCount: number, result: AttemptResult | null, };
+export type EyeProfile = { profileHash: string, layoutHash: string, rigHash: string, colorModelHash: string, width: number, height: number, sampleCount: number, };
+export type RetinalConfig = { clientGeneration: number, sceneId: string, mapHash: string, profile: EyeProfile, };
+export type EyePose = { flyId: number, position: [number, number, number], rotation: [number, number, number, number], };
+export type VisionRequest = { attemptId: string, clientGeneration: number, tick: number, profileHash: string, sceneId: string,
+/**
+ * Ascending active fly IDs also define the RGB byte order.
+ */
+poses: Array<EyePose>, };
+export type RetinaBatch = { request: VisionRequest,
+/**
+ * Fly order, then L/R eye, sample, and linear R/G/B bytes.
+ */
+rgb: Uint8Array, };
+export type ChunkHeader = { schemaVersion: number, attemptId: string, sequence: number, startTick: number, tickCount: number, flyCount: number, mapHash: string | null, profileHash: string | null, sceneId: string | null, result: AttemptResult | null, };
 export type SpawnDef = { "kind": "fixed", states: Array<SpawnState>, } | { "kind": "cluster", min: Point, max: Point, flyingCount: number, };
 export type SpawnState = { pose: BodyPose, mode: SpawnMode, };
 export type SpawnMode = "walking" | "flying";
@@ -95,7 +108,7 @@ reserved: Array<ContactRegion>, };
 export type Placement = { id: number, kind: ToolKind, position: Point, heading: number, };
 export type PlacementEdit = { "type": "place", placement: Placement, } | { "type": "move", id: number, position: Point, heading: number, } | { "type": "remove", id: number, };
 export type PlacementState = { placements: Array<Placement>, remaining: Array<ToolStock>, food: Array<ContactSurface>, objects: Array<ContactSurface>, contactHazards: Array<ContactHazard>, };
-export type ResolvedSetup = { state: PlacementState, sources: Array<Source>, fieldConfig: FieldConfig, };
+export type ResolvedSetup = { fixedPlacements: Array<Placement>, state: PlacementState, sources: Array<Source>, fieldConfig: FieldConfig, };
 export type CueInput = { pathway: CuePathway, gain: number, };
 export type AttemptTuning = { cues: Array<CueInput>, tasteGain: number,
 /**
@@ -109,13 +122,17 @@ export type AttemptSpec = { schemaVersion: number, attemptId: string, graphHash:
 rootSeed: string, flyCount: number, durationTicks: number, };
 export type FlyFrame = { id: number, inputPose: BodyPose, sensory: SensorySample | null, neural: StepOutput | null, body: BodyState, events: Array<BodyEvent>, };
 export type AttemptResult = { attemptId: string, completedTick: number, outcomes: OutcomeSummary, stars: number, };
-export type AttemptFrame = { tick: number, neuralSteps: number, flies: Array<FlyFrame>, result: AttemptResult | null, };
+export type AttemptFrame = { tick: number, neuralSteps: number, flies: Array<FlyFrame>, result: AttemptResult | null,
+/**
+ * Exact pre-neural observations, including terminal-transition ticks.
+ */
+retina?: RetinaBatch | null, };
 export type LifecycleScenario = "mealThenStarvation" | "proboscisSilenced" | "openExit" | "blockedExit";
 export type LifecycleInfo = { scenario: LifecycleScenario, spec: AttemptSpec, level: LevelDef, food: Array<ContactSurface>, initialGrid: FieldGrid, initialBodies: Array<BodyState>, };
 export type LifecycleEvent = { flyId: number, event: BodyEvent, };
-export type RecordLayout = { schemaVersion: number, noSupport: number, valueFields: Array<string>, motionValueFields: Array<string>, motionStateFields: Array<string>, motionSampleFields: Array<string>, maxMotionPoints: number, stateFields: Array<string>, eventFields: Array<string>, groupIds: Array<string>, groupFields: Array<string>, modes: Array<BodyMode>, outcomes: Array<TerminalOutcome | null>, feedingEnds: Array<FeedingEnd>, eventKinds: Array<string>, sensoryPresentMask: number, neuralPresentMask: number, maxChunkTicks: number, maxEventsPerFlyTick: number, };
-export type PackedChunk = { schemaVersion: number, attemptId: string, sequence: number, startTick: number, tickCount: number, flyCount: number, motionOffsets: Array<number>, motionValues: Array<number>, motionStates: Array<number>, values: Array<number>, states: Array<number>, events: Array<number>, tickNeuralSteps: Array<number>, result: AttemptResult | null, };
-export type FieldScenario = "excitatoryOdor" | "inhibitoryOdor" | "lamp" | "shade" | "wind" | "exit";
+export type RecordLayout = { schemaVersion: number, retinalConfig: RetinalConfig | null, retinalPresentMask: number, noSupport: number, valueFields: Array<string>, motionValueFields: Array<string>, motionStateFields: Array<string>, motionSampleFields: Array<string>, maxMotionPoints: number, stateFields: Array<string>, eventFields: Array<string>, groupIds: Array<string>, groupFields: Array<string>, modes: Array<BodyMode>, outcomes: Array<TerminalOutcome | null>, feedingEnds: Array<FeedingEnd>, eventKinds: Array<string>, sensoryPresentMask: number, neuralPresentMask: number, maxChunkTicks: number, maxEventsPerFlyTick: number, };
+export type PackedChunk = { schemaVersion: number, attemptId: string, sequence: number, startTick: number, tickCount: number, flyCount: number, retinaRgb: Array<number>, motionOffsets: Array<number>, motionValues: Array<number>, motionStates: Array<number>, values: Array<number>, states: Array<number>, events: Array<number>, tickNeuralSteps: Array<number>, mapHash: string | null, profileHash: string | null, sceneId: string | null, result: AttemptResult | null, };
+export type FieldScenario = "excitatoryOdor" | "inhibitoryOdor" | "wind" | "exit";
 export type FieldLabInfo = { brain: BrainInfo, scenario: FieldScenario, grids: [FieldGrid, FieldGrid], };
 export type FieldLabFrame = { tick: number, flies: [BrainFrame, BrainFrame], grids: [FieldGrid, FieldGrid], };
 export type Point = { x: number, z: number, };
@@ -152,8 +169,7 @@ export type Source = { position: Point, radius: number,
 rate: number, kind: SourceKind, };
 export type ExitCue = { position: Point, roomId: number, radius: number, strength: number, };
 export type FieldSample = { attractiveOdor: number, repellentOdor: number, brightness: number, shade: number, exitCue: number, };
-export type SensorySample = { vision: VisionSample, left: FieldSample, right: FieldSample, wind: Point, };
-export type VisionSample = { brightness: [number, number, number, number, number, number, number, number], blocked: [number, number, number, number, number, number, number, number], };
+export type SensorySample = { left: FieldSample, right: FieldSample, wind: Point, };
 export type FieldGrid = { origin: Point, max: Point, cellSize: number, width: number, height: number, cells: Array<FieldSample | null>,
 /**
  * Uniform ambient vector for diagnostic labels; local samples use wind_cells.

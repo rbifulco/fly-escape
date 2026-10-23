@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { attachSceneAssetRegistryBridge, attachSpatialReviewDiscoveryBridge, createSpatialReviewEditorAuthorization, spatialReviewEditorUrl } from "@alterno-dev/spatial-review";
-import { HouseGeometry } from "../../../packages/game-renderer/src/house";
+import { WorldScene } from "../../../packages/game-renderer/src/world-scene";
 import { loadHouseAssets } from "../../../packages/game-renderer/src/house-assets";
-import { loadRoomDetails, type RoomDetails } from "../../../packages/game-renderer/src/room-details";
+import { loadRoomDetails } from "../../../packages/game-renderer/src/room-details";
 import { loadPlacementModel } from "../../../packages/game-renderer/src/placement-models";
 import { disposeObjectResources } from "../../../packages/game-renderer/src/resources";
 import { placementAssetUrls } from "../../../assets/tools/registry";
@@ -53,13 +53,13 @@ if (import.meta.hot) import.meta.hot.dispose(dispose);
 async function start() {
   if (!selected) throw new Error(`Unknown review level: ${requested}`);
   const { level, title } = selected;
-  const house = new HouseGeometry(level.geometry, selected.roomFloors);
-  owned.add(house.root);
-  let roomDetails: RoomDetails | undefined;
+  const world = new WorldScene({ geometry: level.geometry, roomFloors: selected.roomFloors, mode: "presentation" });
+  const { house } = world;
+  owned.add(world.root);
   const fixedModels = new Map<string, THREE.Group>();
   const results = await Promise.allSettled([
-    loadHouseAssets({ houseAssetKeys: house.assetKeys, setHousePart: (part, root) => house.replace(part, root) }, isCurrent),
-    loadRoomDetails({ setRoomDetails: details => { roomDetails = details; owned.add(details.root); } }, selected.roomDetails ?? [], isCurrent),
+    loadHouseAssets(house, isCurrent),
+    loadRoomDetails(world, selected.roomDetails ?? [], isCurrent),
     ...[...new Set(level.fixedObjects.map(object => object.kind))].map(async kind => {
       const response = await fetch(placementAssetUrls[kind]);
       if (!response.ok) throw new Error(`${kind} asset request failed (${response.status})`);
@@ -72,6 +72,7 @@ async function start() {
   if (!active) return;
   const failure = results.find(result => result.status === "rejected");
   if (failure?.status === "rejected") throw failure.reason;
+  const roomDetails = world.details;
   if (!roomDetails) throw new Error("Room details did not finish loading");
   const { root, registry } = createReviewScene({ buildId: `${__SPATIAL_REVIEW_BUILD_ID__}-${level.id}`, title, level, house, details: selected.roomDetails ?? [], roomDetails, fixedModels });
   owned.add(root);

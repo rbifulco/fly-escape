@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@alterno-dev/spatial-review": "0.7.0",
+    "@alterno-dev/spatial-review": "0.8.0",
     "@fly-escape/game-renderer": "workspace:*",
     "@fly-escape/sim-client": "workspace:*",
     "@vercel/analytics": "^2.0.1",

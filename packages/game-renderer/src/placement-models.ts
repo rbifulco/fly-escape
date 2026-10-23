@@ -14,6 +14,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import type { Placement, ToolDef } from "@fly-escape/sim-client";
 import { disposeObjectResources } from "./resources";
 export type PlacementKind = Placement["kind"];
+export type PlacementAppearance = Pick<ToolDef, "kind" | "footprintRadius" | "contact">;
 const nativeSurfaces: Partial<Record<PlacementKind, typeof appleSurface>> = {
   spiderWeb: webSurface, bugZapper: zapperSurface, fan: fanSurface, vinegar: vinegarSurface, fruit: appleSurface, banana: bananaSurface, wornShoes: shoesSurface,
   dirtyDishes: dishesSurface, laundry: laundrySurface, sleepingCat: catSurface,
@@ -77,24 +78,25 @@ type Ghost = { placement: Placement; valid: boolean | null };
 export class PlacementModels {
   readonly root = new THREE.Group();
   private sources = new Map<PlacementKind, THREE.Group>();
-  private placements: Placement[] = [];
-  private catalog: ToolDef[] = [];
+  private placements: readonly Placement[] = [];
+  private catalog: readonly PlacementAppearance[] = [];
   private ghost?: Ghost;
   private ghostMaterial = new THREE.MeshStandardMaterial({
     transparent: true,
     opacity: 0.7,
     depthWrite: false,
   });
+  constructor(private readonly presentation = true) {}
   replace(kind: PlacementKind, source: THREE.Group): void {
     const old = this.sources.get(kind);
     this.sources.set(kind, source);
     this.rebuild();
     if (old) disposeObjectResources(old);
   }
-  setPlacements(placements: Placement[], catalog: ToolDef[], ghost?: Ghost): void {
+  setPlacements(placements: readonly Placement[], catalog: readonly PlacementAppearance[], ghost?: Ghost): void {
     this.placements = placements;
     this.catalog = catalog;
-    this.ghost = ghost;
+    this.ghost = this.presentation ? ghost : undefined;
     this.rebuild();
   }
   private rebuild(): void {

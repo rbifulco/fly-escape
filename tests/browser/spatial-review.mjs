@@ -82,7 +82,14 @@ try {
   page.on('request', request => requests.push(request.url()));
   await page.goto(base);
   await page.waitForSelector('canvas', { timeout: 90000 });
-  assert.ok(!requests.some(url => /spatial-review|\/review-/.test(url)), 'Normal game loaded review code');
+  // Match review modules, not an arbitrary checkout directory in Vite's /@fs URLs.
+  const reviewRequests = requests.filter(url => {
+    const pathname = new URL(url).pathname;
+    return /\/src\/spatial-review(?:-scene)?\.[jt]s$/.test(pathname)
+      || /\/assets\/review-[^/]+\.js$/.test(pathname)
+      || /\/@alterno-dev[/_+]spatial-review(?:[/@._-]|$)/.test(pathname);
+  });
+  assert.deepEqual(reviewRequests, [], 'Normal game loaded review code');
   assert.deepEqual(errors, []);
   console.log('Normal game renders without review code; no browser errors');
 } finally { parentServer.close(); await browser.close(); }

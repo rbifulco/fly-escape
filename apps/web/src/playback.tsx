@@ -4,11 +4,12 @@ import { StarCelebration, WatchedStars } from "./star-celebration";
 import { Stars } from "./stars";
 import { DepartureTail } from "./departure-tail";
 import type { PreviewUpdate } from "./fly-preview";
-import type { RoomDetail, RoomFloor } from "@fly-escape/game-renderer";
+import type { RoomDetail, RoomFloor, WorldLightingAuthoring } from "@fly-escape/game-renderer";
 import { loadWorldAssets } from "./world-assets";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   WorldView,
+  defaultWorldLighting,
   flyAnimation,
   departingFly,
   recordedTrails,
@@ -116,7 +117,7 @@ function sample(run: Run): FlyPose[] {
   const tick = Math.floor(run.clock.cursorTick);
   if (tick !== run.cachedTick) {
     run.cachedTick = tick;
-    run.lower = run.archive.frame(tick);
+    run.lower = run.archive.frame(tick, { retina: false });
     run.trailHistory = run.archive.poseHistory(tick);
   }
   const motions = run.archive.motion(run.clock.cursorTick);
@@ -152,6 +153,7 @@ export function AttemptPlayback({
   catalog = [],
   roomDetails,
   roomFloors,
+  lighting,
   onReturn,
   onStars,
 }: {
@@ -161,6 +163,7 @@ export function AttemptPlayback({
   catalog?: ToolDef[];
   roomDetails?: readonly RoomDetail[];
   roomFloors?: readonly RoomFloor[];
+  lighting?: WorldLightingAuthoring;
   onReturn?: () => void;
   onStars?: (stars: number) => void;
 }) {
@@ -191,7 +194,9 @@ export function AttemptPlayback({
   const requestedRef = useRef(requested);
   requestedRef.current = requested;
   const [error, setError] = useState("");
-  const [worldReady, setWorldReady] = useState(false);
+  const [recordError, setRecordError] = useState(false);
+  const [worldReady, setWorldReady] = useState(!!world);
+  const [returnTarget, setReturnTarget] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let raf = 0,
@@ -204,17 +209,20 @@ export function AttemptPlayback({
     let lastDiagnosticAt = -Infinity;
     let renderFailed = false;
     let sampledPoses: FlyPose[] = [];
-    const fail = (message: string) => {
+    const fail = (message: string, recordFailure = false) => {
       console.error("[Fly escape] attempt failed", { message, spec: run.current?.info.spec });
       if (run.current) {
         run.current.failed = true;
         run.current.clock.pause();
       }
       setError(message);
+      setRecordError(recordFailure);
       setRequested(false);
       setDisplay((previous) => ({
         ...previous,
         state: "error",
+        computed: run.current?.archive.computedTick ?? 0,
+        frame: previous.frame ?? (run.current?.archive.computedTick ? run.current.archive.frame(Math.floor(run.current.clock.cursorTick), { retina: false }) : undefined),
         report: JSON.stringify({ ...JSON.parse(previous.report), state: "error", error: message }, null, 2),
       }));
     };
@@ -266,6 +274,7 @@ export function AttemptPlayback({
           reply.info.level.geometry,
           reply.info.spec.flyCount,
           roomFloors,
+          lighting,
         );
         scene.current.attach(container.current!);
         scene.current.setContactGeometry(
@@ -277,7 +286,7 @@ export function AttemptPlayback({
         scene.current.setSupportSurfaces([
           ...reply.info.resolvedSetup.state.food, ...reply.info.resolvedSetup.state.objects,
         ]);
-        scene.current.setPlacements(reply.info.spec.placements, catalog, undefined, reply.info.level.fixedObjects);
+        scene.current.setPlacements(reply.info.spec.placements, catalog, undefined, reply.info.resolvedSetup.fixedPlacements);
         scene.current.setPoses(sample(run.current));
         scene.current.enableSelection(selectFly);
         scene.current.selectFly(null);
@@ -316,7 +325,7 @@ export function AttemptPlayback({
           if (current.rateWindow.length > 20) current.rateWindow.shift();
         }
       } else if (reply.type === "error") {
-        fail(reply.message);
+        fail(reply.message, !!reply.recordError);
       }
     });
     restart.current = () => {
@@ -340,12 +349,15 @@ export function AttemptPlayback({
       lastState = "";
       lastMode = "";
       setError("");
+      setRecordError(false);
       renderFailed = false;
       setRequested(true);
       setSelected(null);
       lastFrameAt = null;
       requestedAt = performance.now();
-      if (input) observer.start(input);
+      if (input) observer.start(input, input.tuning.cues.some(cue => cue.pathway === "vision")
+        ? { roomDetails: roomDetails ?? [], roomFloors: roomFloors ?? [], lighting: lighting ?? defaultWorldLighting }
+        : undefined);
       else observer.startLab(crypto.randomUUID(), "42", LAB_FLY_COUNT, DURATION_TICKS);
     };
     const visibility = () => {
@@ -556,6 +568,7 @@ export function AttemptPlayback({
   const timedRound = input?.level.bodyConfig.life.kind === "timed";
   const secondsLeft = Math.ceil(Math.max(0,
     ((input?.level.durationTicks ?? DURATION_TICKS) - display.cursor) * TICK_SECONDS));
+  const recordUnavailable = !!error && !run.current?.archive.computedTick;
   return (
     <main
       className={`playback-lab${input ? " campaign-playback" : ""}`}
@@ -565,6 +578,7 @@ export function AttemptPlayback({
       data-computed-tick={display.computed}
       data-playback-state={error ? "error" : display.state}
       data-world-state={error ? "error" : worldReady ? "ready" : "loading"}
+      data-world-assets-ready={worldReady}
       data-fly-count={info?.spec.flyCount ?? 0}
     >
       {!input && <header>
@@ -607,7 +621,7 @@ export function AttemptPlayback({
                                 : "Playing in real time"
                               : "Paused"}
               </strong>
-              <span data-testid="round-time">
+              {!error && <span data-testid="round-time">
                 {timedRound
                   ? `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")} left`
                   : <>
@@ -615,9 +629,9 @@ export function AttemptPlayback({
                       {((input?.level.durationTicks ?? DURATION_TICKS) * TICK_SECONDS).toFixed(1)} s
                       {!input && <> · {(display.computed * TICK_SECONDS).toFixed(1)} s computed</>}
                     </>}
-              </span>
+              </span>}
             </div>
-            <input
+            {!error && <input
               aria-label="Playback time"
               data-testid="playback-seek"
               type="range"
@@ -635,15 +649,17 @@ export function AttemptPlayback({
                   ),
                 )
               }
-            />
+            />}
             <PlaybackControls
+              inactive={!!error}
               ready={worldReady && !!info && !error}
               fastReady={worldReady && !!run.current?.archive.complete && !error}
               replayReady={worldReady && display.computed > 0 && !error && (!input || !!run.current?.archive.complete)}
               requested={requested}
               mode={display.mode}
               returnToSetup={!!onReturn}
-              returnLabel={onReturn ? (error ? "Back to setup" : run.current?.archive.complete ? "Retry — edit setup" : "Cancel attempt") : "New attempt"}
+              returnTarget={returnTarget}
+              returnLabel={onReturn ? (error ? "Back to setup" : run.current?.archive.complete ? "Retry — edit setup" : "Cancel attempt") : error ? "Start a new attempt" : "New attempt"}
               onPause={() => { setRequested(false); control(current => current.clock.pause()); }}
               onResume={() => { setRequested(true); control(current => current.clock.play()); }}
               onPlay={() => { setRequested(true); control(current => { current.clock.setMode("realTime"); current.clock.play(); }); }}
@@ -677,19 +693,21 @@ export function AttemptPlayback({
             </p>
           )}
           {error && (
-            <p role="alert" className="error">
-              {input ? "This flight was interrupted. You can try again from setup." : error}
-            </p>
+            <div role="alert" className="error recording-error">
+              <p>{input && !recordError ? "This flight was interrupted. You can try again from setup." : error}</p>
+              <div ref={setReturnTarget} />
+            </div>
           )}
-          <div className="playback-counters" aria-label="Outcomes at playback time">
-            <b data-testid="active-count">{(info?.spec.flyCount ?? input?.flyCount ?? LAB_FLY_COUNT) - terminalCount} {error ? "paused" : "active"}</b>
+          {recordUnavailable ? <p className="record-unavailable" role="status"><strong>Recording unavailable</strong><br />No recorded frames are available.</p> : <div className="playback-counters" aria-label="Outcomes at playback time">
+            <b data-testid="active-count">{error ? `${info?.spec.flyCount ?? 0} recorded flies` : `${(info?.spec.flyCount ?? input?.flyCount ?? LAB_FLY_COUNT) - terminalCount} active`}</b>
             {Object.entries(counts).filter(([name]) => !timedRound || name !== "starved").map(([name, count]) => (
               <span key={name} data-testid={`outcome-${name}`}>
                 {count} {name === "timedOut" ? "dead" : name}
               </span>
             ))}
-          </div>
-          {info && (
+          </div>}
+          {error && !recordUnavailable && <p className="record-paused">Fly states recorded at {((display.frame?.tick ?? 0) * TICK_SECONDS).toFixed(1)}{"\u00a0"}s.</p>}
+          {info && !recordUnavailable && (
             <SciencePanel previews={previewUpdate}
               key={info.spec.attemptId}
               info={info}
@@ -703,12 +721,11 @@ export function AttemptPlayback({
               }}
             />
           )}
-          <NeuralExplanations />
+          {!recordUnavailable && <NeuralExplanations />}
           <details>
-            <summary>Playback and camera controls</summary>
+            <summary>{error ? "Camera controls" : "Playback and camera controls"}</summary>
             <p>
-              Click a fly or its card to follow it. Left- or right-click the scene to clear the selection. Drag to move the camera. Scroll to get closer, or move to the edge
-              to explore the house. Pause and rewind to take a closer look at what its neurons did.
+              {error ? `${recordUnavailable ? "" : "Click a recorded fly or its card to inspect it. "}Drag to move the camera and scroll to get closer.` : "Click a fly or its card to follow it. Left- or right-click the scene to clear the selection. Drag to move the camera. Scroll to get closer, or move to the edge to explore the house. Pause and rewind to take a closer look at what its neurons did."}
             </p>
           </details>
           <details hidden={!!input}>

@@ -1,5 +1,5 @@
 import { loadHousePart, type HouseAsset } from "./house";
-import type { WorldView } from "./index";
+import type { HouseGeometry } from "./house";
 import wallUrl from "../../../assets/house/wall.glb?url";
 import tileFloorUrl from "../../../assets/house/tile-floor/tile-floor.glb?url";
 import floorUrl from "../../../assets/house/floor.glb?url";
@@ -13,11 +13,11 @@ import sofaUrl from "../../../assets/house/sofa/sofa.glb?url";
 
 const urls: Record<HouseAsset, string> = { wall: wallUrl, floor: floorUrl, tileFloor: tileFloorUrl, solid: solidUrl, cabinet: cabinetUrl, sofa: sofaUrl, desk: deskUrl, chair: chairUrl, bed: bedUrl, kitchen: kitchenUrl };
 
-/** Load one kit per view. Replacement owns resources; retired views release late replies. */
-export async function loadHouseAssets(view: Pick<WorldView, "houseAssetKeys" | "setHousePart">, isCurrent: () => boolean, parts: readonly HouseAsset[] = view.houseAssetKeys) {
+/** Load one kit per house. Replacement owns resources; retired owners release late replies. */
+export async function loadHouseAssets(house: HouseGeometry, isCurrent: () => boolean, parts: readonly HouseAsset[] = house.assetKeys, signal?: AbortSignal) {
   const results = await Promise.allSettled(
     parts.map(async (part) => {
-      const response = await fetch(urls[part]);
+      const response = await fetch(urls[part], { signal });
       if (!response.ok) throw new Error(`House ${part} request failed (${response.status})`);
       return { part, model: await loadHousePart(await response.arrayBuffer(), part) };
     }),
@@ -30,6 +30,6 @@ export async function loadHouseAssets(view: Pick<WorldView, "houseAssetKeys" | "
   }
   for (const result of results) {
     if (result.status === "fulfilled")
-      view.setHousePart(result.value.part, result.value.model.root);
+      house.replace(result.value.part, result.value.model.root);
   }
 }
