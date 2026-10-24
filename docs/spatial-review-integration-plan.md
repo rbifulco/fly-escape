@@ -97,3 +97,94 @@ Not verified: a human feedback-export/source-change round trip and exhaustive
 appearance comparison of every material. The full optional Python/Rust test suite
 was not run; screenshots and command logs from the original local validation
 were temporary, not committed historical evidence.
+
+## SDK 0.9.0 update (2026-10-24)
+
+The production source remains the existing `spatial-review-pages` branch and
+`.github/workflows/pages.yml` deployment. This update uses the declared Bun
+1.3.14 package manager and commits `bun.lock`. The web workspace pins
+`@alterno-dev/spatial-review` 0.9.0; its transitive protocol resolves to 0.9.0.
+There are no directly declared protocol, validator, or CLI dependencies. The
+patched Three.js 0.185.1 version is unchanged.
+
+Capture build IDs now include `fly-escape-sdk-0.9.0`, the GitHub/Vercel source
+commit when available, the existing build timestamp, and the selected level.
+No actor, asset, assembly, component, material, source reference, approved editor
+origin, or registration boundary is intentionally changed. There are no static
+geometry exports or prepared review packages to migrate: the production build
+regenerates the live producer from source and each capture reloads its native
+models. The ordinary game and asset-authoring source are unchanged.
+
+### Appearance and resource review
+
+`createReviewScene` continues cloning placement nodes while retaining shared
+native geometry/material/texture resources. Native GLTF materials keep their
+source `vertexColors` settings, RGB attributes, UVs and supported texture maps.
+No blanket vertex-color enablement was added. Registered house and household
+models use standard loaded materials; unsupported `ShaderMaterial` roots are
+still rejected by the existing pre-bridge validation. The live game's shader
+and diagnostic effects outside the registered artwork remain excluded.
+
+Version 0.9.0 now carries supported UVs/maps into the Scene representation as
+well as Asset. The representative subject is the tiled Room 2 floor in Open
+Window (`open-window-room-2-floor`), with the corresponding Turn the Corner
+floor checked by the existing browser test. The native tile-floor GLB is
+325,504 B and embeds one 321,681 B, 1024 x 1024 PNG. Decoded RGBA8 storage is
+4,194,304 B per unique image, and an RGBA8 GPU allocation with a complete mip
+chain is approximately 5.33 MiB, separately from encoded transfer and geometry.
+These are decoded/GPU estimates; actual driver allocations are not measured.
+Live texture transfer was verified as nonempty, decodable image transport;
+the source PNG length is not claimed as the live re-encoded transfer length.
+Repeated placements keep canonical asset IDs and shared resources rather than
+multiplying image storage by actor count.
+
+Remaining appearance differences are the existing neutral review lighting,
+opaque full-height walls instead of camera cutaways, deliberate 0.28 doorway
+opacity, and exclusion of grass/meadow, sun glow, postprocessing, selection and
+diagnostic overlays, animation and player-added objects. No authored Experience
+route is exposed; interactive free camera/fly-follow is not a navigation export.
+
+### Validation gates
+
+A clean checkout of the actual publishing revision was used, excluding unrelated
+source files from other branches. Exact toolchains: Bun 1.3.14, Rust 1.94.1,
+wasm-pack 0.15.0, and the existing pinned Python requirements.
+
+Before and after the dependency update:
+
+- 35 Python tests passed (29 graph/metadata and 6 reference tests).
+- 178 Rust tests passed; the existing one ignored test remains ignored.
+- 128 JavaScript tests passed (32 client, 83 renderer, 2 asset tools, 11 web).
+- The complete production build passed: type generation, brain assets,
+  release Rust/WASM, game web application, and asset lab application.
+- TypeScript checking and the existing Pages staging command passed.
+- Frozen-lockfile installation succeeded; no other dependency version changed.
+
+The final complete `bun run test` passed. Existing warnings about large Vite
+chunks and test-environment GLTF blob-image loading do not fail the tests.
+The separate real-browser texture requests succeeded.
+
+The existing `tests/browser/spatial-review.mjs` assertions passed with a 640 x
+400 viewport and the validation environment's proxy certificate trusted in a
+disposable Chromium context. Both levels expose the same 38/46 actors and one
+assembly, live tile images transfer successfully, refresh retains actor IDs,
+and an unauthorized cross-origin loopback parent is rejected. The ordinary game
+renders with no review-module request and no browser JavaScript error. The
+original 1400 x 1000 smoke run passed both capture paths and authorization but
+hit a software-GPU timeout on the ordinary-game canvas; the compact rerun
+completed all assertions. This is not a hardware-GPU performance measurement.
+
+The SDK remains absent from the ordinary game's runtime path, so the upgrade
+adds no continuous review-only frame or resource work to visitor sessions.
+Both capture previews render on demand through their existing controls.
+
+### Publication acceptance
+
+Production publication and final read-only editor acceptance are performed from
+`https://rbifulco.github.io/fly-escape/` through the existing Pages workflow.
+The representative review subject is checked in Scene and Asset without a
+selection highlight. Check both static discovery URLs and the capture build ID;
+inspect current texture readiness instead of inferring it from resource IDs.
+Production acceptance was pending when this record was committed; the deployment
+run and final task report record the published revision and observed result.
+No test feedback notes or other persistent editor edits are required.

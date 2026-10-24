@@ -4,7 +4,7 @@ export default defineConfig({
   base: process.env.PAGES_BASE || '/',
   plugins: [{ name: 'spatial-review-discovery-cors', configureServer: discoveryCors, configurePreviewServer: discoveryCors }],
   worker: { format: 'es' },
-  define: { __SPATIAL_REVIEW_BUILD_ID__: JSON.stringify(`fly-escape-${process.env.VERCEL_GIT_COMMIT_SHA ?? 'local'}-${Date.now()}`) },
+  define: { __SPATIAL_REVIEW_BUILD_ID__: JSON.stringify(`fly-escape-sdk-0.9.0-${process.env.GITHUB_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'local'}-${Date.now()}`) },
   build: {
     target: 'es2022',
     rolldownOptions: { input: {
