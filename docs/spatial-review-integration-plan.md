@@ -178,13 +178,56 @@ The SDK remains absent from the ordinary game's runtime path, so the upgrade
 adds no continuous review-only frame or resource work to visitor sessions.
 Both capture previews render on demand through their existing controls.
 
-### Publication acceptance
+### Published acceptance and remaining editor limitation
 
-Production publication and final read-only editor acceptance are performed from
-`https://rbifulco.github.io/fly-escape/` through the existing Pages workflow.
-The representative review subject is checked in Scene and Asset without a
-selection highlight. Check both static discovery URLs and the capture build ID;
-inspect current texture readiness instead of inferring it from resource IDs.
-Production acceptance was pending when this record was committed; the deployment
-run and final task report record the published revision and observed result.
-No test feedback notes or other persistent editor edits are required.
+[Pages run 40123258600](https://github.com/rbifulco/fly-escape/actions/runs/40123258600)
+succeeded for source commit `e95645d4e1e1088643d8e537df2007df6f73fbf5`.
+Both deployed discovery documents returned HTTP 200 with JSON content type and
+`Access-Control-Allow-Origin: *`. Starting with the ordinary website URL in the
+official editor discovered the published capture and reported the exact build:
+`fly-escape-sdk-0.9.0-e95645d4e1e1088643d8e537df2007df6f73fbf5-1792868504521-open-window`.
+
+Read-only production checks confirmed:
+
+- Scene loaded 38/38 asset meshes and one level assembly, with the expected
+  stable actor/source IDs and no authored path references. The final Scene
+  inspection cleared the selection (`Nothing selected`).
+- Asset opened `open-window-room-2-floor`: 36 triangles, 64 vertices, four
+  nodes, one material, geometry ready, and 1/1 texture ready. The ceramic UV
+  layout and visible mapped surface were inspected.
+- The floor's Asset component-selection outline remained during that visual
+  inspection. Clicking empty canvas clears the selected asset as well and
+  returns to the first wall asset. A bounded check found no exposed selection-
+  outline toggle. Consequently the floor's fully unhighlighted Asset appearance
+  comparison remains unverified; this is a consumer interaction limitation,
+  not a passed check. Geometry, UV retention, decoded texture transfer and
+  texture readiness were independently verified.
+- No browser JavaScript error occurred. No feedback note, comment, or other
+  persistent review edit was created. Existing feedback was not modified.
+
+The deployed tile representation contains exactly 1,496 B of Scene geometry and
+2,264 B of Asset geometry: 64 positions/UV entries and 108 Uint16 indices, plus
+64 supplied normals in Asset. These are actual negotiated Float32/Uint16
+attribute/index bytes. Its live PNG transfer was 422,244 B (re-encoded from the
+321,681 B source PNG), decodable at 1024 x 1024. Decoded RGBA8 storage is 4 MiB,
+with a one-upload full-mipmap estimate of 5.33 MiB. Capture readiness was 2.9 s,
+metadata delivery 36 ms, and the representative Scene/Asset responses 8/4 ms
+on the shared software-rendering host; these are observed samples rather than
+a production performance guarantee.
+
+The official-editor transport audit also covered the complete Open Window
+Scene: 23 canonical assets for 38 actors use 1,053,712 B of negotiated typed
+geometry buffers. Six unique image resource IDs transferred successfully,
+totalling 21,436,771 B of PNG bytes and 67,108,864 B (64 MiB) of estimated
+decoded RGBA8 storage. One RGBA8 upload with a complete mip chain per unique
+image would use approximately 85.33 MiB. Actual GPU memory is not measured;
+separate renderer/cache copies can add to that estimate. Shared image resources
+are counted once, not once per placement or material binding. Only two assets
+were requested in the Asset-detail profile during that audit, so its partial
+aggregate is not reported as a full-catalog Asset cost.
+
+The disposable editor validation context used a 1280 x 800 viewport and spaced
+editor animation callbacks by 120 ms to reduce shared software-GPU contention.
+No website or editor source was changed for that test. All validation browser
+contexts were closed afterward. No Experience test applies because the producer
+exports no authored journey.
